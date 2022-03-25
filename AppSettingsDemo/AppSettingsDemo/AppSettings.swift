@@ -29,4 +29,8 @@ final public class AppSettings {
     public func int(forKey key: String) -> Int?{
         settings[key] as? Int
     }
+    
+    public func value(forKey key: String) -> Any?{
+        settings[key]
+    }
 }
