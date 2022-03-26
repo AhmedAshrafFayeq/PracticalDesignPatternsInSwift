@@ -43,7 +43,7 @@ final public class AppSettings {
         }
     }
     
-    public func set(value: String, forKey key: String) {
+    public func set(value: Any, forKey key: String) {
         //we have to serialize the access to set value forKey
         //if multiple threads are calling the method conccurently the task will be serialized and excuted one after the other.
         serialQueue.sync {
