@@ -15,7 +15,15 @@ final public class AppSettings {
     
     //There are a problem when read and write at the same time (Singleton is not a thread safe)
     //so we have to make it thread safe by creating (SerialQueue)
-    private let serialQueue = DispatchQueue(label: "serialQueue")
+    //SerialQueue gurantee that tasks get excuted one at a time
+    //.....
+    //.....
+    // but serializing method causes performance issues we don't have to serialize reading
+    
+///    private let serialQueue = DispatchQueue(label: "serialQueue")
+    
+    //so let's make it concurrent Queue
+    private let conccurentQueue = DispatchQueue(label: "conccurentQueue", attributes: .concurrent)
     
     private var settings: [String: Any] = [
                                             "Theme": "Dark",
@@ -26,19 +34,21 @@ final public class AppSettings {
     private init() {}
     
     public func string(forKey key: String) -> String? {
-        serialQueue.sync {
+        conccurentQueue.sync {
             return settings[key] as? String
         }
     }
     
     public func int(forKey key: String) -> Int? {
-        serialQueue.sync {
+        conccurentQueue.sync {
             return settings[key] as? Int
         }
     }
     
     public func value(forKey key: String) -> Any? {
-        serialQueue.sync {
+        
+        //excute in parallel
+        conccurentQueue.sync {
             return settings[key]
         }
     }
@@ -46,8 +56,15 @@ final public class AppSettings {
     public func set(value: Any, forKey key: String) {
         //we have to serialize the access to set value forKey
         //if multiple threads are calling the method conccurently the task will be serialized and excuted one after the other.
-        serialQueue.sync {
-            settings[key] = value
+
+//        serialQueue.sync {
+//            settings[key] = value
+//        }
+        
+        conccurentQueue.async(flags: .barrier){
+            self.settings[key] = value
         }
+        // the barrier ensure that the queue won't start excuting the block until all the previous blocks have completed
+        // convert conccurent queue to serial
     }
 }
