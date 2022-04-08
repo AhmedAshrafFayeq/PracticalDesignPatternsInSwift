@@ -1,6 +1,8 @@
 // UserDefaults doesn't have to store and retrieve date instances
 // So I'll add set date for key, and date for methods
 
+
+//Decorator using Object Wrapper
 import Foundation
 
 class UserDefaultsDecorator: UserDefaults {
