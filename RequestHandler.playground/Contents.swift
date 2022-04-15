@@ -36,7 +36,8 @@ let stringHandler = Handler<String>(next: dataHandler)
 let dateHandler = Handler<Date>(next: stringHandler)
 
 let data = Data(repeating: 0, count: 10)
+let str = "Ahmed"
 dataHandler.handle(request: data)
-
-//should to end of the 
+dataHandler.handle(request: str)
+//should to end of the
 dataHandler.handle(request: 42)
