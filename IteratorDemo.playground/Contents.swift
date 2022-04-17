@@ -22,7 +22,6 @@ final class Queue<T> {
             tail = head
             return
         }
-        
         // append new element
         // not empty queue
         tail?.next = newNode
@@ -60,8 +59,8 @@ queue.enqueue(22)
  for item in queue {
     print(item)
 }
- 
 */
+
 //we will get a compiler error
 // we have to adopt one of two protocols (Sequence, Iterator Ptotocol)
 
@@ -93,11 +92,12 @@ extension Queue: Sequence {
     }
 }
 
-
 for item in queue {
    print(item)
 }
 print("-------------------------")
+
+// using make iterator method which implemented in Queue
 var queryIterator = queue.makeIterator()
 while let item = queryIterator.next() {
         print(item)
