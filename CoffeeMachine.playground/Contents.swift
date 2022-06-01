@@ -1,9 +1,92 @@
 import Foundation
 
+fileprivate protocol CoffeeMachineState {
+    func isReadyToBrew() -> Bool
+    func brew()
+}
+
+//add default implementation for the protocol methods using extension.
+extension CoffeeMachineState {
+    func isReadyToBrew() -> Bool {
+        print("\(#function) not implemented for \(self) state")
+        return false
+    }
+    
+    func brew() {
+        print("\(#function) not implemented for \(self) state")
+    }
+}
+
+fileprivate struct StandbyState: CoffeeMachineState {
+    
+}
+
+fileprivate struct FillWaterTankState: CoffeeMachineState {
+    var context: CoffeeMachine
+    
+    func isReadyToBrew() -> Bool {
+        guard context.isWaterTankFilled else {
+            print("Fill water tank!")
+            context.state = StandbyState()
+            return false
+        }
+        context.state = EmptyCapsuleBinState(context: context)
+        return context.state.isReadyToBrew()
+    }
+}
+
+fileprivate struct EmptyCapsuleBinState: CoffeeMachineState {
+    var context: CoffeeMachine
+    
+    func isReadyToBrew() -> Bool {
+        guard context.isCapsuleBinEmpty else {
+            print("Empty Capsule bin tank!")
+            context.state = StandbyState()
+            return false
+        }
+        context.state = InsertCapsuleState(context: context)
+        return context.state.isReadyToBrew()
+    }
+}
+
+fileprivate struct InsertCapsuleState: CoffeeMachineState {
+    var context: CoffeeMachine
+    
+    func isReadyToBrew() -> Bool {
+        guard context.isCapsuleInserted else {
+            print("Coffee capsule not inserted!")
+            context.state = StandbyState()
+            return false
+        }
+        // all states are ready
+        return true
+    }
+}
+
+// goes through all states
+fileprivate struct BrewCoffeeState: CoffeeMachineState {
+    var context: CoffeeMachine
+    
+    func brew() {
+        context.state = FillWaterTankState(context: context)  // goes through all states internally
+        guard context.state.isReadyToBrew() else {
+            print("Somthing went wrong!")
+            context.state = StandbyState()
+            return
+        }
+        print("Coffee is ready!")
+        context.state = StandbyState()
+    }
+}
+
+
+
 class CoffeeMachine {
-    private var isWaterTankFilled: Bool
-    private var isCapsuleBinEmpty: Bool
-    private var isCapsuleInserted: Bool
+    fileprivate var isWaterTankFilled: Bool
+    fileprivate var isCapsuleBinEmpty: Bool
+    fileprivate var isCapsuleInserted: Bool
+    
+    fileprivate var state:  CoffeeMachineState = StandbyState()
     
     required init(waterFilled: Bool, binEmpty: Bool, capsuleInserted: Bool) {
         isWaterTankFilled = waterFilled
@@ -11,34 +94,11 @@ class CoffeeMachine {
         isCapsuleInserted = capsuleInserted
     }
     
-    private func isReadyToBrew() -> Bool {
-        var result = false
-        
-        if isWaterTankFilled {
-            if isCapsuleBinEmpty {
-                if isCapsuleInserted {
-                    result = true
-                    print("Coffee brewed")
-                }else {
-                    print("Insert capsule!")
-                }
-            }else {
-                print("Capsule bin full!")
-            }
-        }else {
-            print("Fill water tank!")
-        }
-        return result
-    }
-    
     func brew() {
-        guard isReadyToBrew() else {
-            print("Can't make coffee")
-            return
-        }
-        print("coffee ready!")
+        state = BrewCoffeeState(context: self)
+        state.brew()
     }
 }
 
-let coffeeMachine = CoffeeMachine(waterFilled: true, binEmpty: true, capsuleInserted: false)
+let coffeeMachine = CoffeeMachine(waterFilled: true, binEmpty: true, capsuleInserted: true)
 coffeeMachine.brew()
